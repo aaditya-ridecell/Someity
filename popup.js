@@ -1,5 +1,4 @@
 var assistant_start = 0;
-var assistant_enable_stored;
 
 // Building Font palette within popup.html [Keep this above popup load function]
 var colors = [
@@ -60,11 +59,6 @@ for (var i = 0; i < colors.length; i++) {
 
 // On popup load function
 $(function () {
-  chrome.storage.sync.get("assistant_enable", function (stored) {
-    assistant_enable_stored = stored.assistant_enable;
-    console.log(assistant_enable_stored);
-  });
-
   // Font Slider Setting
   chrome.storage.sync.get("fontSizeSlider", function (stored) {
     $("#fontSizeSlider_value").html(stored.fontSizeSlider);
@@ -371,10 +365,176 @@ $("#textStrokeButton").bind("change", function (data) {
     });
   }
   chrome.storage.sync.set({
-    ["textStrokeColor"]: pickedColor.length > 0 ? pickedColor[0].value : "#C0382B",
+    ["textStrokeColor"]:
+      pickedColor.length > 0 ? pickedColor[0].value : "#C0382B",
   });
   chrome.storage.sync.set({
-    ["textStrokeColorId"]: pickedColor.length > 0 ? pickedColor[0].id : "color-12",
+    ["textStrokeColorId"]:
+      pickedColor.length > 0 ? pickedColor[0].id : "color-12",
+  });
+  chrome.storage.sync.set({
+    ["textStrokeButton"]: $(data.target).is(":checked"),
+  });
+});
+
+// Text Stroke Color Palette
+$("input[name=ts-color]").bind("change", function (data) {
+  if ($("#textStrokeButton").is(":checked")) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        todo: "textStroke",
+        textStrokeColor: $(data.target).val(),
+        checkedButton: 1,
+      });
+    });
+  } else {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        todo: "textStroke",
+        checkedButton: 0,
+      });
+    });
+  }
+  chrome.storage.sync.set({ ["textStrokeColor"]: $(data.target).val() });
+  chrome.storage.sync.set({ ["textStrokeColorId"]: $(data.target).attr("id") });
+});
+
+//Font Color Button
+$("#fontColorButton").bind("change", function (data) {
+  var pickedColor = $("input[name=color]:checked");
+  if ($(data.target).is(":checked")) {
+    document.getElementById("font-color-switch-header").textContent = "On";
+    if (pickedColor.length > 0) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          todo: "fontColor",
+          fontColor: pickedColor[0].value,
+          checkedButton: 1,
+        });
+      });
+    }
+  } else {
+    document.getElementById("font-color-switch-header").textContent = "Off";
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        todo: "fontColor",
+        checkedButton: 0,
+      });
+    });
+  }
+  chrome.storage.sync.set({
+    ["fontColor"]: pickedColor.length > 0 ? pickedColor[0].value : "#C0382B",
+  });
+  chrome.storage.sync.set({
+    ["fontColorId"]: pickedColor.length > 0 ? pickedColor[0].id : "color-12",
+  });
+  chrome.storage.sync.set({
+    ["fontColorButton"]: $(data.target).is(":checked"),
+  });
+});
+
+// Font Color Palette
+$("input[name=color]").bind("change", function (data) {
+  if ($("#fontColorButton").is(":checked")) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        todo: "fontColor",
+        fontColor: $(data.target).val(),
+        checkedButton: 1,
+      });
+    });
+  } else {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        todo: "fontColor",
+        checkedButton: 0,
+      });
+    });
+  }
+  chrome.storage.sync.set({ ["fontColor"]: $(data.target).val() });
+  chrome.storage.sync.set({ ["fontColorId"]: $(data.target).attr("id") });
+});
+
+// Magnifier Button
+$("#magnifierButton").bind("change", function (data) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      todo: "magnify",
+      checkedButton: $(data.target).is(":checked") ? 1 : 0,
+    });
+  });
+  chrome.storage.sync.set({
+    ["magnifyButton"]: $(data.target).is(":checked"),
+  });
+});
+
+// Image Veil Button
+$("#imageVeilButton").bind("change", function (data) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      todo: "imageVeil",
+      checkedButton: $(data.target).is(":checked") ? 1 : 0,
+    });
+  });
+  chrome.storage.sync.set({
+    ["imageVeilButton"]: $(data.target).is(":checked"),
+  });
+});
+
+// Highlight Words Button
+$("#highlightWordsButton").bind("change", function (data) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      todo: "highlight",
+      checkedButton: $(data.target).is(":checked") ? 1 : 0,
+    });
+  });
+  chrome.storage.sync.set({
+    ["highlightWordsButton"]: $(data.target).is(":checked"),
+  });
+});
+
+// Emphasize Links Button
+$("#emphasizeLinksButton").bind("change", function (data) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      todo: "emphasizeLinks",
+      checkedButton: $(data.target).is(":checked") ? 1 : 0,
+    });
+  });
+  chrome.storage.sync.set({
+    ["emphasizeLinksButton"]: $(data.target).is(":checked"),
+  });
+});
+
+//Text Stroke Button
+$("#textStrokeButton").bind("change", function (data) {
+  var pickedColor = $("input[name=ts-color]:checked");
+  if ($(data.target).is(":checked")) {
+    if (pickedColor.length > 0) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          todo: "textStroke",
+          textStrokeColor: pickedColor[0].value,
+          checkedButton: 1,
+        });
+      });
+    }
+  } else {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        todo: "textStroke",
+        checkedButton: 0,
+      });
+    });
+  }
+  chrome.storage.sync.set({
+    ["textStrokeColor"]:
+      pickedColor.length > 0 ? pickedColor[0].value : "#C0382B",
+  });
+  chrome.storage.sync.set({
+    ["textStrokeColorId"]:
+      pickedColor.length > 0 ? pickedColor[0].id : "color-12",
   });
   chrome.storage.sync.set({
     ["textStrokeButton"]: $(data.target).is(":checked"),
@@ -406,21 +566,23 @@ $("input[name=ts-color]").bind("change", function (data) {
 // Speech Recognition
 const startButton = document.getElementsByClassName("activation-button")[0];
 startButton.addEventListener("click", function () {
-  if (assistant_enable_stored) {
-    if (assistant_start) {
-      $(this).prop("src", "images/microphone-off.png");
-      assistant_start = 0;
-      isStopButtonClicked = true;
-      stopTracking();
+  chrome.storage.sync.get("assistant_enable", function (stored) {
+    if (stored.assistant_enable) {
+      if (assistant_start) {
+        $(".activation-button").attr("src", "images/microphone-off.png");
+        assistant_start = 0;
+        isStopButtonClicked = true;
+        stopTracking();
+      } else {
+        $(".activation-button").attr("src", "images/microphone-on.png");
+        isStopButtonClicked = false;
+        assistant_start = 1;
+        startTracking();
+      }
     } else {
-      $(this).prop("src", "images/microphone-on.png");
-      isStopButtonClicked = false;
-      assistant_start = 1;
-      startTracking();
+      $(".activation-button").attr("src", "images/microphone-disable.png");
     }
-  } else {
-    $(this).prop("src", "images/microphone-disable.png");
-  }
+  });
 });
 
 var recognition,
@@ -489,17 +651,7 @@ function sendResult(data) {
   if (data.includes("open")) {
     var temp = data.slice(5);
     if (temp != null && temp !== "undefined") {
-      if (temp == "google") {
-        result = "https://www.google.com";
-      } else if (temp == "facebook") {
-        result = "https://www.facebook.com";
-      } else if (temp == "youtube.com") {
-        result = "https://www.youtube.com";
-      } else if (temp == "wikipedia") {
-        result = "https://www.wikipedia.com";
-      } else {
-        result = "https://www.google.com/search?q=" + temp;
-      }
+      result = "https://duckduckgo.com/?q=!" + temp;
       port.postMessage({ action: "open", result: result });
       port.onMessage.addListener(function (msg) {
         if (msg.response == "ok") {
@@ -529,12 +681,12 @@ function sendResult(data) {
         }
       });
     }
-  } else if (data.includes("to")) {
+  } else if (data.includes("direction")) {
     var temp = data.split("to");
     if (temp != null && temp !== "undefined") {
       result =
         "https://www.google.com/maps/dir/" +
-        temp[0].trim() +
+        temp[0].split("direction")[1].trim() +
         "/" +
         temp[1].trim();
       port.postMessage({ action: "direction", result: result });
@@ -546,4 +698,10 @@ function sendResult(data) {
   }
 }
 
-//
+$("#printjob").bind("click", function () {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      todo: "printJob",
+    });
+  });
+});
